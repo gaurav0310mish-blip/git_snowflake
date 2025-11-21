@@ -1,0 +1,8 @@
+# Sample ADW sqlcl cloud config (for reference)
+# You normally don't commit the real wallet or config file.
+# Use GitHub secrets and runtime generation instead.
+
+[default]
+user=ADW_USER
+password=ADW_PASSWORD
+connectString=myadb_tp

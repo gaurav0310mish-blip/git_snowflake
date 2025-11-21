@@ -1,0 +1,52 @@
+name: ADW Ingestion Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+
+    env:
+      SNOW_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
+      SNOW_USER: ${{ secrets.SNOW_USER }}
+      SNOW_PASSWORD: ${{ secrets.SNOW_PASSWORD }}
+      SNOW_WAREHOUSE: ${{ secrets.SNOW_WAREHOUSE }}
+      SNOW_ROLE: ${{ secrets.SNOW_ROLE }}
+      SNOW_DB: ${{ secrets.SNOW_DB }}
+      SNOW_SCHEMA: ${{ secrets.SNOW_SCHEMA }}
+
+      ADW_CONNECT_STRING: ${{ secrets.ADW_CONNECT_STRING }}
+      ADW_USERNAME: ${{ secrets.ADW_USERNAME }}
+      ADW_PASSWORD: ${{ secrets.ADW_PASSWORD }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install SnowSQL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y snowsql || true
+        if ! command -v snowsql &> /dev/null; then
+          echo "SnowSQL not available via package manager in this runner."
+          echo "Install manually or use a Docker-based job in your real pipeline."
+        fi
+
+    - name: Install SQLcl
+      run: |
+        echo "In a real pipeline, download SQLcl from Oracle and unzip it."
+        echo "For template purposes, we just assume 'sql' is in PATH."
+        echo "You will need to adjust this step in your own repo."
+
+    - name: Export data from Snowflake (MYTABLE)
+      env:
+        SNOW_PASSWORD: ${{ secrets.SNOW_PASSWORD }}
+      run: |
+        ./scripts/export_snowflake.sh MYTABLE
+
+    - name: Run ingestion into ADW
+      run: |
+        ./scripts/run_ingestion.sh
